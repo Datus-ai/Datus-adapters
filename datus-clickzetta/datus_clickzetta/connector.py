@@ -7,7 +7,7 @@ from __future__ import annotations
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Literal, Optional, override
+from typing import Any, Dict, List, Literal, Optional, override
 
 import pandas as pd
 import pyarrow as pa
