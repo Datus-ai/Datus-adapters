@@ -19,6 +19,7 @@ Plugin Adapters (Independent packages, install as needed)
 │
 └── Native SDK Adapters
     ├── datus-snowflake
+    ├── datus-clickzetta
     ├── datus-clickhouse (coming soon)
     └── datus-bigquery (coming soon)
 ```
@@ -89,6 +90,39 @@ pip install datus-snowflake
 - Efficient SHOW commands
 - Arrow format support
 
+---
+
+### 5. datus-clickzetta
+ClickZetta Lakehouse database adapter (native SDK).
+
+**Installation**:
+```bash
+pip install datus-clickzetta
+```
+
+**Features**:
+- Native ClickZetta ZettaPark SDK
+- Full SQL support (DDL, DML, DQL)
+- Workspace and schema management
+- Volume/Stage file operations
+- Metadata discovery
+- Connection pooling and session management
+
+---
+
+## Coming Soon
+
+### datus-postgresql
+PostgreSQL database adapter (SQLAlchemy-based).
+
+### datus-clickhouse
+ClickHouse database adapter (native SDK).
+
+### datus-bigquery
+Google BigQuery adapter (cloud service SDK).
+
+### datus-oracle
+Oracle database adapter (SQLAlchemy-based).
 ---
 
 ## Development Guide
