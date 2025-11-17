@@ -5,7 +5,7 @@
 # etc.
 
 [project]
-name = "datus-adapters"
+name = "datus-db-adapters"
 version = "0.1.0"
 description = "Datus database adapters workspace (development only)"
 requires-python = ">=3.12"

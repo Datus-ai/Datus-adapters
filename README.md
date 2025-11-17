@@ -15,13 +15,10 @@ Plugin Adapters (Independent packages, install as needed)
 ├── datus-sqlalchemy (SQLAlchemy base layer)
 │   ├── datus-mysql
 │   ├── datus-starrocks
-│   └── datus-postgresql (coming soon)
 │
 └── Native SDK Adapters
     ├── datus-snowflake
     ├── datus-clickzetta
-    ├── datus-clickhouse (coming soon)
-    └── datus-bigquery (coming soon)
 ```
 
 ## Implemented Adapters
@@ -110,21 +107,6 @@ pip install datus-clickzetta
 
 ---
 
-## Coming Soon
-
-### datus-postgresql
-PostgreSQL database adapter (SQLAlchemy-based).
-
-### datus-clickhouse
-ClickHouse database adapter (native SDK).
-
-### datus-bigquery
-Google BigQuery adapter (cloud service SDK).
-
-### datus-oracle
-Oracle database adapter (SQLAlchemy-based).
----
-
 ## Development Guide
 
 ### Development Environment Setup
@@ -133,8 +115,8 @@ This repository uses workspace configuration to manage multiple adapter packages
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/Datus-adapters.git
-cd Datus-adapters
+git clone https://github.com/your-org/datus-db-adapters.git
+cd datus-db-adapters
 
 # Install all adapters (development mode)
 uv sync
@@ -197,27 +179,6 @@ def register():
 
 register()
 ```
-
-### Testing
-
-Each adapter should include comprehensive tests:
-
-```bash
-cd datus-<database>
-pytest tests/
-```
-
-### Publishing
-
-```bash
-# Build
-python -m build
-
-# Publish to PyPI
-python -m twine upload dist/*
-```
-
----
 
 ## Using with Datus Agent
 

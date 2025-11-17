@@ -29,9 +29,9 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/datusai/Datus-adapters"
-Repository = "https://github.com/datusai/Datus-adapters"
-Issues = "https://github.com/datusai/Datus-adapters/issues"
+Homepage = "https://github.com/Datus-ai/datus-db-adapters"
+Repository = "https://github.com/Datus-ai/datus-db-adapters"
+Issues = "https://github.com/Datus-ai/datus-db-adapters/issues"
 
 [project.entry-points."datus.adapters"]
 starrocks = "datus_starrocks:register"
