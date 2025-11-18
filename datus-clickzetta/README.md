@@ -107,14 +107,200 @@ The adapter provides comprehensive error handling with detailed error messages f
 
 ## Development
 
-To contribute to this adapter:
+### Development Mode Setup (Complete Guide)
+
+This guide covers the complete setup from Datus agent installation to ClickZetta adapter development and testing.
+
+#### Prerequisites
+- Python 3.11+ recommended
+- Git
+
+#### Step 1: Setup Datus Agent Development Environment
+
+```bash
+# Clone the Datus agent repository
+git clone https://github.com/Datus-ai/datus-agent.git
+cd datus-agent
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install Datus agent in editable mode
+pip install -e .
+```
+
+#### Step 2: Clone and Install ClickZetta Adapter
+
+```bash
+# From your development directory
+git clone https://github.com/Datus-ai/datus-db-adapters.git
+cd datus-db-adapters/datus-clickzetta
+
+# Install ClickZetta adapter in editable mode (using the same virtual environment)
+pip install -e .
+
+# Verify installation
+pip show datus-clickzetta
+```
+
+#### Step 3: Configure Environment Variables
+
+Create a `.env` file or set environment variables:
+
+```bash
+# ClickZetta connection settings
+export CLICKZETTA_SERVICE="your-service.clickzetta.com"
+export CLICKZETTA_USERNAME="your-username"
+export CLICKZETTA_PASSWORD="your-password"
+export CLICKZETTA_INSTANCE="your-instance-id"
+export CLICKZETTA_WORKSPACE="your-workspace"
+export CLICKZETTA_SCHEMA="your-schema"
+export CLICKZETTA_VCLUSTER="default_ap"
+
+# LLM API keys (optional for testing)
+export DASHSCOPE_API_KEY="your-dashscope-key"
+export DEEPSEEK_API_KEY="your-deepseek-key"
+```
+
+#### Step 4: Create ClickZetta Configuration
+
+In your Datus agent directory, create a ClickZetta configuration file:
+
+```bash
+# In datus-agent directory
+cp conf/agent.yml.example conf/agent.clickzetta.yml
+```
+
+Update `conf/agent.clickzetta.yml` with ClickZetta settings:
+
+```yaml
+agent:
+  target: qwen_main  # or your preferred model
+  home: .datus_home
+
+  models:
+    # Your model configurations here
+
+  namespace:
+    clickzetta:
+      type: clickzetta
+      service: ${CLICKZETTA_SERVICE}
+      username: ${CLICKZETTA_USERNAME}
+      password: ${CLICKZETTA_PASSWORD}
+      instance: ${CLICKZETTA_INSTANCE}
+      workspace: ${CLICKZETTA_WORKSPACE}
+      schema: ${CLICKZETTA_SCHEMA}
+      vcluster: ${CLICKZETTA_VCLUSTER}
+      secure: false
+```
+
+#### Step 5: Start Development and Testing
+
+**Test the adapter directly:**
+```bash
+# From datus-clickzetta directory
+python -c "
+from datus_clickzetta.connector import ClickZettaConnector
+import os
+
+connector = ClickZettaConnector(
+    service=os.getenv('CLICKZETTA_SERVICE'),
+    username=os.getenv('CLICKZETTA_USERNAME'),
+    password=os.getenv('CLICKZETTA_PASSWORD'),
+    instance=os.getenv('CLICKZETTA_INSTANCE'),
+    workspace=os.getenv('CLICKZETTA_WORKSPACE'),
+    schema=os.getenv('CLICKZETTA_SCHEMA'),
+    vcluster=os.getenv('CLICKZETTA_VCLUSTER'),
+    secure=False
+)
+
+result = connector.execute('SHOW SCHEMAS')
+print(f'Connected! Found {result.row_count} schemas')
+"
+```
+
+**Start Datus CLI with ClickZetta:**
+```bash
+# From datus-agent directory
+python -m datus.cli.main --config conf/agent.clickzetta.yml --namespace clickzetta
+```
+
+#### Step 6: Development Workflow
+
+**Making Changes:**
+1. Edit code in `datus-clickzetta/datus_clickzetta/connector.py`
+2. Changes are immediately available (editable install)
+3. No need to reinstall the package
+
+**Testing Changes:**
+```bash
+# Run adapter tests
+cd datus-clickzetta
+python test.py
+
+# Test with Datus CLI
+cd ../datus-agent
+python -m datus.cli.main --config conf/agent.clickzetta.yml --namespace clickzetta
+```
+
+**Commit and Push:**
+```bash
+# From adapter directory
+git add .
+git commit -m "Your changes"
+git push origin your-branch
+
+# From agent directory (if you made agent changes)
+git add .
+git commit -m "Your agent changes"
+git push origin your-branch
+```
+
+#### Directory Structure
+
+```text
+your-dev-folder/
+├── datus-agent/                    # Datus agent repository
+│   ├── .venv/                     # Shared virtual environment
+│   ├── conf/agent.clickzetta.yml  # ClickZetta configuration
+│   └── ...
+└── datus-db-adapters/             # Adapters repository
+    └── datus-clickzetta/          # ClickZetta adapter
+        ├── datus_clickzetta/
+        │   └── connector.py       # Main connector code
+        └── ...
+```
+
+#### Tips for Development
+
+- **Editable Installs**: Both packages are installed in editable mode, so code changes are immediate
+- **Environment Variables**: Use `.env` files for local development, environment variables for production
+- **Testing**: Always test both the adapter directly and through the Datus CLI
+- **Debugging**: Use `logger.debug()` statements; enable with `DATUS_LOG_LEVEL=DEBUG`
+
+#### Contributing Guidelines
 
 1. Clone the repository
-2. Install development dependencies: `pip install -e .[dev]`
-3. Run tests:
-   - `python test.py` (from project root)
-   - Or: `cd tests && python run_tests.py`
-4. Follow the existing code style and patterns
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `python test.py`
+5. Ensure code style compliance
+6. Submit a pull request
+
+#### Common Development Issues
+
+**Import Errors:**
+- Ensure both packages are installed in editable mode
+- Check virtual environment is activated
+
+**Connection Issues:**
+- Verify environment variables are set
+- Test connection with the direct connector test above
+
+**CLI Issues:**
+- Check configuration file syntax
+- Verify namespace configuration matches your environment
 
 ## Testing
 
