@@ -16,10 +16,10 @@ authors = [
 ]
 
 # Required dependencies for this package
-# - datus-agent: The main Datus framework (version 0.2.2 or higher)
+# - datus-agent: The main Datus framework (version 0.2.1 or higher)
 # - redshift_connector: Official Amazon Redshift Python connector
 dependencies = [
-    "datus-agent>=0.2.2",
+    "datus-agent>=0.2.1",
     "redshift_connector>=2.0.0",
 ]
 
