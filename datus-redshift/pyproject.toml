@@ -1,0 +1,41 @@
+# Build system configuration - uses hatchling for building the package
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Project metadata
+[project]
+name = "datus-redshift"
+version = "0.1.0"
+description = "Amazon Redshift adapter for Datus Agent"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "../LICENSE"}
+authors = [
+    {name = "Datus Team"}
+]
+
+# Required dependencies for this package
+# - datus-agent: The main Datus framework (version 0.2.1 or higher)
+# - redshift_connector: Official Amazon Redshift Python connector
+dependencies = [
+    "datus-agent>=0.2.1",
+    "redshift_connector>=2.0.0",
+]
+
+# Optional dependencies for development (install with: pip install datus-redshift[dev])
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",        # Testing framework
+    "pytest-cov>=4.0.0",    # Code coverage for tests
+]
+
+# Entry point that allows Datus to auto-discover this adapter
+# This tells Datus where to find the register() function
+[project.entry-points."datus.adapters"]
+redshift = "datus_redshift:register"
+
+# Configure which package to include in the wheel distribution
+[tool.hatch.build.targets.wheel]
+packages = ["datus_redshift"]
+
