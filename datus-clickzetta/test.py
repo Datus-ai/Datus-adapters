@@ -4,9 +4,10 @@ Simple test runner that delegates to the tests directory.
 This provides a convenient way to run tests from the project root.
 """
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def main():
     # Change to tests directory and run the main test runner
@@ -18,6 +19,7 @@ def main():
     # Run in tests directory
     result = subprocess.run(cmd, cwd=tests_dir)
     sys.exit(result.returncode)
+
 
 if __name__ == "__main__":
     main()

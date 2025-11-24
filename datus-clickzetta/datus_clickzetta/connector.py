@@ -7,13 +7,13 @@ from __future__ import annotations
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, override
+from typing import Any, Dict, List, Literal, Optional
 
 import pandas as pd
 import pyarrow as pa
-
 from datus.schemas.base import TABLE_TYPE
 from datus.schemas.node_models import ExecuteSQLResult
+
 # Legacy connector - does not inherit from BaseSqlConnector directly
 from datus.utils.constants import DBType, SQLType
 from datus.utils.exceptions import DatusException, ErrorCode
@@ -81,6 +81,7 @@ class ClickZettaConnector:
     ):
         # Initialize minimal attributes without calling parent's __init__
         from datus.tools.db_tools.config import ConnectionConfig
+
         self.config = ConnectionConfig()
         self.timeout_seconds = 30
         self.connection = None
@@ -171,7 +172,7 @@ class ClickZettaConnector:
             if self.vcluster:
                 escaped_vc = _safe_escape_identifier(self.vcluster.upper())
                 self._session.sql(f"USE VCLUSTER `{escaped_vc}`")
-        except (ImportError, ConnectionError, OSError, ValueError) as exc:
+        except (ImportError, OSError, ValueError) as exc:
             raise DatusException(
                 ErrorCode.DB_CONNECTION_FAILED,
                 message_args={"error_message": str(exc)},
@@ -454,8 +455,7 @@ class ClickZettaConnector:
         except Exception as e:
             logger.error(f"Error executing query to DataFrame: {sql}, error: {str(e)}")
             raise DatusException(
-                code=ErrorCode.DB_EXECUTION_ERROR,
-                message=f"Failed to execute query to DataFrame: {str(e)}"
+                code=ErrorCode.DB_EXECUTION_ERROR, message=f"Failed to execute query to DataFrame: {str(e)}"
             ) from e
 
     def execute_query_to_dict(self, sql: str) -> List[Dict[str, Any]]:
@@ -469,8 +469,7 @@ class ClickZettaConnector:
         except Exception as e:
             logger.error(f"Error executing query to dict: {sql}, error: {str(e)}")
             raise DatusException(
-                code=ErrorCode.DB_EXECUTION_ERROR,
-                message=f"Failed to execute query to dict: {str(e)}"
+                code=ErrorCode.DB_EXECUTION_ERROR, message=f"Failed to execute query to dict: {str(e)}"
             ) from e
 
     def execute_ddl(self, sql: str) -> ExecuteSQLResult:
@@ -489,25 +488,16 @@ class ClickZettaConnector:
         try:
             df = self._run_query(sql)
             if df.empty:
-                return ExecuteSQLResult(
-                    success=True,
-                    data=pa.Table.from_pandas(df),
-                    row_count=0
-                )
+                return ExecuteSQLResult(success=True, data=pa.Table.from_pandas(df), row_count=0)
 
             # Convert pandas DataFrame to Arrow Table
             arrow_table = pa.Table.from_pandas(df)
 
-            return ExecuteSQLResult(
-                success=True,
-                data=arrow_table,
-                row_count=len(df)
-            )
+            return ExecuteSQLResult(success=True, data=arrow_table, row_count=len(df))
         except Exception as e:
             logger.error(f"Error executing Arrow query: {sql}, error: {str(e)}")
             raise DatusException(
-                code=ErrorCode.DB_EXECUTION_ERROR,
-                message=f"Failed to execute Arrow query: {str(e)}"
+                code=ErrorCode.DB_EXECUTION_ERROR, message=f"Failed to execute Arrow query: {str(e)}"
             ) from e
 
     def test_connection(self):
@@ -537,20 +527,13 @@ class ClickZettaConnector:
                     # For non-SELECT queries, use standard execution
                     command_df = self._run_command(query)
                     row_count = self._extract_row_count(command_df)
-                    results.append(ExecuteSQLResult(
-                        success=True,
-                        data=None,  # No data for non-SELECT queries
-                        row_count=row_count
-                    ))
+                    results.append(
+                        ExecuteSQLResult(success=True, data=None, row_count=row_count)  # No data for non-SELECT queries
+                    )
             except Exception as e:
                 logger.error(f"Error executing query in batch: {query}, error: {str(e)}")
                 # Add failed result to maintain query order
-                results.append(ExecuteSQLResult(
-                    success=False,
-                    data=None,
-                    row_count=0,
-                    error_message=str(e)
-                ))
+                results.append(ExecuteSQLResult(success=False, data=None, row_count=0, error_message=str(e)))
         return results
 
     def execute_content_set(self, sql_query: str) -> ExecuteSQLResult:
@@ -900,21 +883,17 @@ class ClickZettaConnector:
         # Handle different input types
         if isinstance(input_params, str):
             sql_query = input_params
-        elif hasattr(input_params, 'sql_query'):
+        elif hasattr(input_params, "sql_query"):
             sql_query = input_params.sql_query
         elif isinstance(input_params, dict):
-            sql_query = input_params.get('sql_query', '')
+            sql_query = input_params.get("sql_query", "")
         else:
             raise DatusException(
-                ErrorCode.COMMON_INVALID_PARAMETER,
-                message=f"Invalid input_params type: {type(input_params)}"
+                ErrorCode.COMMON_INVALID_PARAMETER, message=f"Invalid input_params type: {type(input_params)}"
             )
 
         if not sql_query:
-            raise DatusException(
-                ErrorCode.COMMON_INVALID_PARAMETER,
-                message="sql_query cannot be empty"
-            )
+            raise DatusException(ErrorCode.COMMON_INVALID_PARAMETER, message="sql_query cannot be empty")
 
         # Execute query based on result format
         try:
@@ -928,11 +907,7 @@ class ClickZettaConnector:
                 # Use execute_query_to_dict for list format
                 rows = self.execute_query_to_dict(sql_query)
                 return ExecuteSQLResult(
-                    success=True,
-                    sql_query=sql_query,
-                    sql_return=rows,
-                    row_count=len(rows),
-                    result_format=result_format
+                    success=True, sql_query=sql_query, sql_return=rows, row_count=len(rows), result_format=result_format
                 )
             else:
                 # Default to CSV format

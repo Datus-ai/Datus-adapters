@@ -20,4 +20,6 @@ dev-dependencies = [
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
+    "flake8>=7.3.0",
+    "isort>=6.0.1",
 ]

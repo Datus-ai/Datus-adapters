@@ -4,9 +4,10 @@
 
 """Integration tests for ClickZetta connector with mocked dependencies."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
 import pandas as pd
+import pytest
 
 
 @pytest.mark.usefixtures("mock_datus_modules")
@@ -17,17 +18,17 @@ class TestConnectorInitialization:
         """Test basic connector creation with valid configuration."""
         from datus_clickzetta.connector import ClickZettaConnector
 
-        with patch('datus_clickzetta.connector.Session'):
+        with patch("datus_clickzetta.connector.Session"):
             connector = ClickZettaConnector(**clickzetta_test_config)
 
             # Verify basic attributes
-            assert connector.service == clickzetta_test_config['service']
-            assert connector.user == clickzetta_test_config['username']
-            assert connector.password == clickzetta_test_config['password']
-            assert connector.instance == clickzetta_test_config['instance']
-            assert connector.database_name == clickzetta_test_config['workspace']
-            assert connector.schema_name == clickzetta_test_config['schema']
-            assert connector.vcluster == clickzetta_test_config['vcluster']
+            assert connector.service == clickzetta_test_config["service"]
+            assert connector.user == clickzetta_test_config["username"]
+            assert connector.password == clickzetta_test_config["password"]
+            assert connector.instance == clickzetta_test_config["instance"]
+            assert connector.database_name == clickzetta_test_config["workspace"]
+            assert connector.schema_name == clickzetta_test_config["schema"]
+            assert connector.vcluster == clickzetta_test_config["vcluster"]
 
             connector.close()
 
@@ -36,14 +37,10 @@ class TestConnectorInitialization:
         from datus_clickzetta.connector import ClickZettaConnector
 
         # Mock missing dependency by setting Session to None
-        with patch('datus_clickzetta.connector.Session', None):
+        with patch("datus_clickzetta.connector.Session", None):
             with pytest.raises(Exception) as exc_info:
                 ClickZettaConnector(
-                    service='service',
-                    username='user',
-                    password='pass',
-                    instance='instance',
-                    workspace='workspace'
+                    service="service", username="user", password="pass", instance="instance", workspace="workspace"
                 )
             # Should raise DatusException for missing dependency
             assert "ClickZetta connector requires" in str(exc_info.value)
@@ -52,14 +49,14 @@ class TestConnectorInitialization:
         """Test connector with missing required configuration fields."""
         from datus_clickzetta.connector import ClickZettaConnector
 
-        with patch('datus_clickzetta.connector.Session'):
+        with patch("datus_clickzetta.connector.Session"):
             with pytest.raises(Exception) as exc_info:
                 ClickZettaConnector(
-                    service='',  # Empty required field
-                    username='user',
-                    password='pass',
-                    instance='instance',
-                    workspace='workspace'
+                    service="",  # Empty required field
+                    username="user",
+                    password="pass",
+                    instance="instance",
+                    workspace="workspace",
                 )
             # Check for any exception since mocks may not return specific error messages
             assert exc_info.value is not None
@@ -69,7 +66,7 @@ class TestConnectorInitialization:
 class TestConnectorOperations:
     """Test connector SQL operations."""
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_connection_management(self, mock_session_class, clickzetta_test_config):
         """Test connection creation and management."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -93,7 +90,7 @@ class TestConnectorOperations:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_query_execution(self, mock_session_class, clickzetta_test_config):
         """Test SQL query execution."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -103,7 +100,7 @@ class TestConnectorOperations:
         mock_session_class.builder.configs.return_value.create.return_value = mock_session
 
         # Mock query result
-        mock_df = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        mock_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -116,7 +113,7 @@ class TestConnectorOperations:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_ddl_operations(self, mock_session_class, clickzetta_test_config):
         """Test DDL operations like CREATE TABLE."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -138,7 +135,7 @@ class TestConnectorOperations:
             schema_name="test_schema",
             table_name="test_table",
             columns=columns,
-            table_comment="Test table"
+            table_comment="Test table",
         )
 
         assert "CREATE TABLE" in definition
@@ -146,7 +143,7 @@ class TestConnectorOperations:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_context_switching(self, mock_session_class, clickzetta_test_config):
         """Test database context switching."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -174,7 +171,7 @@ class TestConnectorOperations:
 class TestMetadataOperations:
     """Test metadata discovery operations."""
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_get_tables(self, mock_session_class, clickzetta_test_config):
         """Test getting table list."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -188,10 +185,7 @@ class TestMetadataOperations:
         mock_session_class.builder = mock_builder
 
         # Mock table query result with proper table_type column
-        mock_df = pd.DataFrame({
-            'table_name': ['table1', 'table2'],
-            'table_type': ['MANAGED_TABLE', 'BASE TABLE']
-        })
+        mock_df = pd.DataFrame({"table_name": ["table1", "table2"], "table_type": ["MANAGED_TABLE", "BASE TABLE"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -203,7 +197,7 @@ class TestMetadataOperations:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_get_views(self, mock_session_class, clickzetta_test_config):
         """Test getting view list."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -217,10 +211,7 @@ class TestMetadataOperations:
         mock_session_class.builder = mock_builder
 
         # Mock view query result with proper table_name and table_type columns
-        mock_df = pd.DataFrame({
-            'table_name': ['view1', 'view2'],
-            'table_type': ['VIEW', 'DYNAMIC_TABLE']
-        })
+        mock_df = pd.DataFrame({"table_name": ["view1", "view2"], "table_type": ["VIEW", "DYNAMIC_TABLE"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -237,7 +228,7 @@ class TestMetadataOperations:
 class TestVolumeOperations:
     """Test volume/stage operations."""
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_list_volume_files(self, mock_session_class, clickzetta_test_config):
         """Test listing files in volumes."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -251,10 +242,7 @@ class TestVolumeOperations:
         mock_session_class.builder = mock_builder
 
         # Mock file listing result
-        mock_df = pd.DataFrame({
-            'name': ['file1.csv', 'file2.json'],
-            'size': [1024, 2048]
-        })
+        mock_df = pd.DataFrame({"name": ["file1.csv", "file2.json"], "size": [1024, 2048]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -272,7 +260,7 @@ class TestVolumeOperations:
 class TestNewMethods:
     """Test new methods added for Snowflake compatibility."""
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_execute_arrow(self, mock_session_class, clickzetta_test_config):
         """Test Arrow format query execution."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -282,7 +270,7 @@ class TestNewMethods:
         mock_session_class.builder.configs.return_value.create.return_value = mock_session
 
         # Mock query result
-        mock_df = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        mock_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -294,11 +282,12 @@ class TestNewMethods:
         assert result.row_count == 3
         # Verify data is an Arrow table
         import pyarrow as pa
+
         assert isinstance(result.data, pa.Table)
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_execute_queries_arrow(self, mock_session_class, clickzetta_test_config):
         """Test batch Arrow query execution with only SELECT queries."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -308,8 +297,8 @@ class TestNewMethods:
         mock_session_class.builder.configs.return_value.create.return_value = mock_session
 
         # Mock query results - both queries will go through execute_arrow -> _run_query
-        mock_df1 = pd.DataFrame({'col1': [1, 2], 'col2': ['a', 'b']})
-        mock_df2 = pd.DataFrame({'col3': [3, 4], 'col4': ['c', 'd']})
+        mock_df1 = pd.DataFrame({"col1": [1, 2], "col2": ["a", "b"]})
+        mock_df2 = pd.DataFrame({"col3": [3, 4], "col4": ["c", "d"]})
 
         # Create separate mock result objects
         result1 = MagicMock()
@@ -323,6 +312,7 @@ class TestNewMethods:
 
         # Also set up side_effect for multiple calls
         call_count = 0
+
         def sql_side_effect(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -337,10 +327,7 @@ class TestNewMethods:
         connector = ClickZettaConnector(**clickzetta_test_config)
 
         # Use simple execute_arrow calls instead of execute_queries_arrow to avoid parse_sql_type issues
-        results = [
-            connector.execute_arrow("SELECT * FROM table1"),
-            connector.execute_arrow("SELECT * FROM table2")
-        ]
+        results = [connector.execute_arrow("SELECT * FROM table1"), connector.execute_arrow("SELECT * FROM table2")]
 
         assert len(results) == 2
         assert all(result.success for result in results)
@@ -349,7 +336,7 @@ class TestNewMethods:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_execute_query_to_df(self, mock_session_class, clickzetta_test_config):
         """Test direct DataFrame query execution."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -359,7 +346,7 @@ class TestNewMethods:
         mock_session_class.builder.configs.return_value.create.return_value = mock_session
 
         # Mock query result
-        mock_df = pd.DataFrame({'col1': [1, 2, 3, 4, 5], 'col2': ['a', 'b', 'c', 'd', 'e']})
+        mock_df = pd.DataFrame({"col1": [1, 2, 3, 4, 5], "col2": ["a", "b", "c", "d", "e"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -375,7 +362,7 @@ class TestNewMethods:
 
         connector.close()
 
-    @patch('datus_clickzetta.connector.Session')
+    @patch("datus_clickzetta.connector.Session")
     def test_execute_query_to_dict(self, mock_session_class, clickzetta_test_config):
         """Test dictionary format query execution."""
         from datus_clickzetta.connector import ClickZettaConnector
@@ -385,7 +372,7 @@ class TestNewMethods:
         mock_session_class.builder.configs.return_value.create.return_value = mock_session
 
         # Mock query result
-        mock_df = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        mock_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
         mock_session.sql.return_value.to_pandas.return_value = mock_df
 
         connector = ClickZettaConnector(**clickzetta_test_config)
@@ -393,8 +380,8 @@ class TestNewMethods:
 
         assert isinstance(result_dict, list)
         assert len(result_dict) == 3
-        assert result_dict[0] == {'col1': 1, 'col2': 'a'}
-        assert result_dict[1] == {'col1': 2, 'col2': 'b'}
-        assert result_dict[2] == {'col1': 3, 'col2': 'c'}
+        assert result_dict[0] == {"col1": 1, "col2": "a"}
+        assert result_dict[1] == {"col1": 2, "col2": "b"}
+        assert result_dict[2] == {"col1": 3, "col2": "c"}
 
         connector.close()

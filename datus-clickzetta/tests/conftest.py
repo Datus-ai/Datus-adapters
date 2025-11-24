@@ -6,8 +6,9 @@
 
 import os
 import sys
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 
 @pytest.fixture(scope="session")
@@ -15,7 +16,7 @@ def mock_datus_modules():
     """Mock datus modules for the entire test session."""
     # Store original modules
     original_modules = {}
-    datus_modules = [key for key in sys.modules if key.startswith('datus')]
+    datus_modules = [key for key in sys.modules if key.startswith("datus")]
     for module in datus_modules:
         original_modules[module] = sys.modules.get(module)
 
@@ -30,7 +31,17 @@ def mock_datus_modules():
     mock_node_models = MagicMock()
 
     class MockExecuteSQLResult:
-        def __init__(self, success=True, error="", sql_query="", sql_return="", row_count=0, result_format="csv", data=None, error_message=None):
+        def __init__(
+            self,
+            success=True,
+            error="",
+            sql_query="",
+            sql_return="",
+            row_count=0,
+            result_format="csv",
+            data=None,
+            error_message=None,
+        ):
             self.success = success
             self.error = error
             self.sql_query = sql_query
@@ -106,18 +117,18 @@ def mock_datus_modules():
     mock_sql_utils.parse_sql_type = MagicMock(return_value="SELECT")
 
     # Set up all mock modules
-    sys.modules['datus'] = mock_datus
-    sys.modules['datus.schemas'] = MagicMock()
-    sys.modules['datus.schemas.base'] = mock_schemas_base
-    sys.modules['datus.schemas.node_models'] = mock_node_models
-    sys.modules['datus.tools'] = MagicMock()
-    sys.modules['datus.tools.db_tools'] = MagicMock()
-    sys.modules['datus.tools.db_tools.base'] = mock_base
-    sys.modules['datus.utils'] = MagicMock()
-    sys.modules['datus.utils.constants'] = mock_constants
-    sys.modules['datus.utils.exceptions'] = mock_exceptions
-    sys.modules['datus.utils.loggings'] = mock_loggings
-    sys.modules['datus.utils.sql_utils'] = mock_sql_utils
+    sys.modules["datus"] = mock_datus
+    sys.modules["datus.schemas"] = MagicMock()
+    sys.modules["datus.schemas.base"] = mock_schemas_base
+    sys.modules["datus.schemas.node_models"] = mock_node_models
+    sys.modules["datus.tools"] = MagicMock()
+    sys.modules["datus.tools.db_tools"] = MagicMock()
+    sys.modules["datus.tools.db_tools.base"] = mock_base
+    sys.modules["datus.utils"] = MagicMock()
+    sys.modules["datus.utils.constants"] = mock_constants
+    sys.modules["datus.utils.exceptions"] = mock_exceptions
+    sys.modules["datus.utils.loggings"] = mock_loggings
+    sys.modules["datus.utils.sql_utils"] = mock_sql_utils
 
     yield
 
@@ -133,13 +144,13 @@ def mock_datus_modules():
 def clickzetta_test_config():
     """Provide standard test configuration for ClickZetta connector."""
     return {
-        'service': os.getenv('CLICKZETTA_SERVICE', 'test-service.clickzetta.com'),
-        'username': os.getenv('CLICKZETTA_USERNAME', 'testuser'),
-        'password': os.getenv('CLICKZETTA_PASSWORD', 'testpass'),
-        'instance': os.getenv('CLICKZETTA_INSTANCE', 'test_instance'),
-        'workspace': os.getenv('CLICKZETTA_WORKSPACE', 'test_workspace'),
-        'schema': os.getenv('CLICKZETTA_SCHEMA', 'PUBLIC'),
-        'vcluster': os.getenv('CLICKZETTA_VCLUSTER', 'DEFAULT_AP')
+        "service": os.getenv("CLICKZETTA_SERVICE", "test-service.clickzetta.com"),
+        "username": os.getenv("CLICKZETTA_USERNAME", "testuser"),
+        "password": os.getenv("CLICKZETTA_PASSWORD", "testpass"),
+        "instance": os.getenv("CLICKZETTA_INSTANCE", "test_instance"),
+        "workspace": os.getenv("CLICKZETTA_WORKSPACE", "test_workspace"),
+        "schema": os.getenv("CLICKZETTA_SCHEMA", "PUBLIC"),
+        "vcluster": os.getenv("CLICKZETTA_VCLUSTER", "DEFAULT_AP"),
     }
 
 
@@ -160,18 +171,10 @@ def mock_clickzetta_session():
 
 def pytest_configure(config):
     """Configure pytest with custom markers."""
-    config.addinivalue_line(
-        "markers", "unit: Mark test as a unit test"
-    )
-    config.addinivalue_line(
-        "markers", "integration: Mark test as an integration test"
-    )
-    config.addinivalue_line(
-        "markers", "requires_clickzetta: Mark test as requiring actual ClickZetta credentials"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Mark test as slow running"
-    )
+    config.addinivalue_line("markers", "unit: Mark test as a unit test")
+    config.addinivalue_line("markers", "integration: Mark test as an integration test")
+    config.addinivalue_line("markers", "requires_clickzetta: Mark test as requiring actual ClickZetta credentials")
+    config.addinivalue_line("markers", "slow: Mark test as slow running")
 
 
 def pytest_collection_modifyitems(config, items):

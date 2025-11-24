@@ -14,10 +14,10 @@ This script provides different test execution modes:
 - Coverage report
 """
 
-import sys
+import argparse
 import os
 import subprocess
-import argparse
+import sys
 from pathlib import Path
 
 
@@ -38,12 +38,13 @@ def run_command(cmd, description=""):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Run ClickZetta adapter tests')
-    parser.add_argument('--mode', choices=['unit', 'integration', 'all', 'quick', 'coverage'],
-                       default='all', help='Test mode to run')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
-    parser.add_argument('--markers', '-m', help='Pytest markers to run (e.g., "not slow")')
-    parser.add_argument('--pattern', '-k', help='Run tests matching pattern')
+    parser = argparse.ArgumentParser(description="Run ClickZetta adapter tests")
+    parser.add_argument(
+        "--mode", choices=["unit", "integration", "all", "quick", "coverage"], default="all", help="Test mode to run"
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--markers", "-m", help='Pytest markers to run (e.g., "not slow")')
+    parser.add_argument("--pattern", "-k", help="Run tests matching pattern")
 
     args = parser.parse_args()
 
@@ -56,15 +57,16 @@ def main():
 
     # Check if pytest is available
     try:
-        subprocess.run([sys.executable, '-m', 'pytest', '--version'],
-                      capture_output=True, check=True)
+        subprocess.run([sys.executable, "-m", "pytest", "--version"], capture_output=True, check=True)
     except subprocess.CalledProcessError:
         print("❌ pytest not found. Trying to install...")
         try:
-            subprocess.run([sys.executable, '-m', 'pip', 'install', 'pytest'], check=True)
+            subprocess.run([sys.executable, "-m", "pip", "install", "pytest"], check=True)
         except subprocess.CalledProcessError:
             try:
-                subprocess.run([sys.executable, '-m', 'pip', 'install', '--break-system-packages', 'pytest'], check=True)
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", "--break-system-packages", "pytest"], check=True
+                )
             except subprocess.CalledProcessError:
                 print("⚠️  Could not install pytest automatically.")
                 print("Please install pytest manually:")
@@ -74,69 +76,68 @@ def main():
                 return 1
 
     # Base pytest command
-    base_cmd = [sys.executable, '-m', 'pytest']
+    base_cmd = [sys.executable, "-m", "pytest"]
 
     if args.verbose:
-        base_cmd.append('-v')
+        base_cmd.append("-v")
     else:
-        base_cmd.extend(['-q', '--tb=short'])
+        base_cmd.extend(["-q", "--tb=short"])
 
     # Add pattern if specified
     if args.pattern:
-        base_cmd.extend(['-k', args.pattern])
+        base_cmd.extend(["-k", args.pattern])
 
     exit_codes = []
 
-    if args.mode == 'unit':
-        cmd = base_cmd + ['./unit/']
+    if args.mode == "unit":
+        cmd = base_cmd + ["./unit/"]
         if args.markers:
-            cmd.extend(['-m', args.markers])
+            cmd.extend(["-m", args.markers])
         exit_codes.append(run_command(cmd, "Unit Tests"))
 
-    elif args.mode == 'integration':
-        cmd = base_cmd + ['./integration/']
+    elif args.mode == "integration":
+        cmd = base_cmd + ["./integration/"]
         if args.markers:
-            cmd.extend(['-m', args.markers])
+            cmd.extend(["-m", args.markers])
         exit_codes.append(run_command(cmd, "Integration Tests"))
 
-    elif args.mode == 'quick':
+    elif args.mode == "quick":
         # Run unit tests + fast integration tests
-        cmd = base_cmd + ['./unit/']
+        cmd = base_cmd + ["./unit/"]
         exit_codes.append(run_command(cmd, "Unit Tests"))
 
-        marker_expr = f'not slow and ({args.markers})' if args.markers else 'not slow'
-        cmd = base_cmd + ['./integration/', '-m', marker_expr]
+        marker_expr = f"not slow and ({args.markers})" if args.markers else "not slow"
+        cmd = base_cmd + ["./integration/", "-m", marker_expr]
         exit_codes.append(run_command(cmd, "Fast Integration Tests"))
 
-    elif args.mode == 'coverage':
+    elif args.mode == "coverage":
         # Install coverage if needed
         try:
-            subprocess.run([sys.executable, '-m', 'coverage', '--version'],
-                          capture_output=True, check=True)
+            subprocess.run([sys.executable, "-m", "coverage", "--version"], capture_output=True, check=True)
         except subprocess.CalledProcessError:
             print("Installing coverage...")
-            subprocess.run([sys.executable, '-m', 'pip', 'install', 'coverage'], check=True)
+            subprocess.run([sys.executable, "-m", "pip", "install", "coverage"], check=True)
 
         # Run tests with coverage
-        cmd = [sys.executable, '-m', 'coverage', 'run', '-m', 'pytest'] + base_cmd[3:]
+        cmd = [sys.executable, "-m", "coverage", "run", "-m", "pytest"] + base_cmd[3:]
         if args.markers:
-            cmd.extend(['-m', args.markers])
+            cmd.extend(["-m", args.markers])
         exit_codes.append(run_command(cmd, "Tests with Coverage"))
 
         # Generate coverage report
-        cmd = [sys.executable, '-m', 'coverage', 'report', '--show-missing']
+        cmd = [sys.executable, "-m", "coverage", "report", "--show-missing"]
         exit_codes.append(run_command(cmd, "Coverage Report"))
 
         # Generate HTML report
-        cmd = [sys.executable, '-m', 'coverage', 'html']
+        cmd = [sys.executable, "-m", "coverage", "html"]
         exit_codes.append(run_command(cmd, "HTML Coverage Report"))
         print("\n📊 HTML coverage report generated in: htmlcov/index.html")
 
     else:  # all
         # Run all tests
-        cmd = base_cmd + ['./']
+        cmd = base_cmd + ["./"]
         if args.markers:
-            cmd.extend(['-m', args.markers])
+            cmd.extend(["-m", args.markers])
         exit_codes.append(run_command(cmd, "All Tests"))
 
     # Summary

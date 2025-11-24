@@ -23,7 +23,7 @@ class ClickZettaConfig(BaseModel):
     hints: Optional[Dict[str, Any]] = Field(default=None, description="Additional connection hints")
     extra: Optional[Dict[str, Any]] = Field(default=None, description="Extra connection parameters")
 
-    @field_validator('service', 'username', 'password', 'instance', 'workspace')
+    @field_validator("service", "username", "password", "instance", "workspace")
     @classmethod
     def validate_non_empty_strings(cls, v):
         """Validate that required string fields are not empty."""

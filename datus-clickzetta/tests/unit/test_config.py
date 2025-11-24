@@ -28,7 +28,7 @@ class TestClickZettaConfig:
             username="testuser",
             password="testpass",
             instance="test_instance",
-            workspace="test_workspace"
+            workspace="test_workspace",
         )
 
         assert config.service == "test-service.clickzetta.com"
@@ -56,7 +56,7 @@ class TestClickZettaConfig:
             vcluster="CUSTOM_VCLUSTER",
             secure=True,
             hints={"sdk.job.timeout": 600, "query_tag": "Custom Query"},
-            extra={"custom_param": "custom_value"}
+            extra={"custom_param": "custom_value"},
         )
 
         assert config.service == "prod-service.clickzetta.com"
@@ -81,7 +81,7 @@ class TestClickZettaConfig:
                 username="testuser",
                 password="testpass",
                 instance="test_instance",
-                workspace="test_workspace"
+                workspace="test_workspace",
             )
         assert "service" in str(exc_info.value)
 
@@ -92,7 +92,7 @@ class TestClickZettaConfig:
                 # username missing
                 password="testpass",
                 instance="test_instance",
-                workspace="test_workspace"
+                workspace="test_workspace",
             )
         assert "username" in str(exc_info.value)
 
@@ -103,7 +103,7 @@ class TestClickZettaConfig:
                 username="testuser",
                 # password missing
                 instance="test_instance",
-                workspace="test_workspace"
+                workspace="test_workspace",
             )
         assert "password" in str(exc_info.value)
 
@@ -114,7 +114,7 @@ class TestClickZettaConfig:
                 username="testuser",
                 password="testpass",
                 # instance missing
-                workspace="test_workspace"
+                workspace="test_workspace",
             )
         assert "instance" in str(exc_info.value)
 
@@ -124,7 +124,7 @@ class TestClickZettaConfig:
                 service="test-service.clickzetta.com",
                 username="testuser",
                 password="testpass",
-                instance="test_instance"
+                instance="test_instance",
                 # workspace missing
             )
         assert "workspace" in str(exc_info.value)
@@ -140,7 +140,7 @@ class TestClickZettaConfig:
             password="testpass",
             instance="test_instance",
             workspace="test_workspace",
-            secure=False
+            secure=False,
         )
         assert config.secure is False
 
@@ -151,7 +151,7 @@ class TestClickZettaConfig:
             password="testpass",
             instance="test_instance",
             workspace="test_workspace",
-            hints={}
+            hints={},
         )
         assert config.hints == {}
 
@@ -162,7 +162,7 @@ class TestClickZettaConfig:
             password="testpass",
             instance="test_instance",
             workspace="test_workspace",
-            extra={"key": "value"}
+            extra={"key": "value"},
         )
         assert config.extra == {"key": "value"}
 
@@ -177,7 +177,7 @@ class TestClickZettaConfig:
                 username="testuser",
                 password="testpass",
                 instance="test_instance",
-                workspace="test_workspace"
+                workspace="test_workspace",
             )
 
     def test_configuration_defaults(self):
@@ -189,7 +189,7 @@ class TestClickZettaConfig:
             username="testuser",
             password="testpass",
             instance="test_instance",
-            workspace="test_workspace"
+            workspace="test_workspace",
         )
 
         # Test that defaults are correctly set
@@ -212,7 +212,7 @@ class TestClickZettaConfig:
             workspace="test_workspace",
             schema="CUSTOM_SCHEMA",
             secure=True,
-            hints={"key": "value"}
+            hints={"key": "value"},
         )
 
         # Serialize to dict using aliases
