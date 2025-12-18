@@ -249,7 +249,7 @@ class MySQLConnector(SQLAlchemyConnector):
         self, catalog_name: str = "", database_name: str = "", schema_name: str = "", table_name: str = ""
     ) -> List[Dict[str, Any]]:
         """
-        Get table schema using DESCRIBE.
+        Get table schema using INFORMATION_SCHEMA.
 
         Args:
             catalog_name: Catalog name (unused)
@@ -264,10 +264,21 @@ class MySQLConnector(SQLAlchemyConnector):
             return []
 
         database_name = database_name or self.database_name
-        full_table_name = self.full_name(database_name=database_name, table_name=table_name)
 
-        # Use DESCRIBE to get schema
-        sql = f"DESCRIBE {full_table_name}"
+        # Use INFORMATION_SCHEMA to get schema with comments
+        sql = f"""
+            SELECT
+                COLUMN_NAME as Field,
+                COLUMN_TYPE as Type,
+                IS_NULLABLE as `Null`,
+                COLUMN_KEY as `Key`,
+                COLUMN_DEFAULT as `Default`,
+                COLUMN_COMMENT as Comment
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = '{database_name}'
+              AND TABLE_NAME = '{table_name}'
+            ORDER BY ORDINAL_POSITION
+        """
         query_result = self._execute_pandas(sql)
 
         result = []
@@ -280,6 +291,7 @@ class MySQLConnector(SQLAlchemyConnector):
                     "nullable": query_result["Null"][i] == "YES",
                     "default_value": query_result["Default"][i],
                     "pk": query_result["Key"][i] == "PRI",
+                    "comment": query_result["Comment"][i],
                 }
             )
         return result

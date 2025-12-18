@@ -1012,18 +1012,23 @@ class RedshiftConnector(BaseSqlConnector, SchemaNamespaceMixin, MaterializedView
         _validate_sql_identifier(schema_name, "schema")
         _validate_sql_identifier(table_name, "table")
 
-        # Query information_schema to get column information
+        # Query information_schema to get column information with comments
         sql = f"""
             SELECT
-                column_name,
-                data_type,
-                is_nullable,
-                column_default,
-                ordinal_position
-            FROM information_schema.columns
-            WHERE table_schema = '{schema_name}'
-            AND table_name = '{table_name}'
-            ORDER BY ordinal_position
+                c.column_name,
+                c.data_type,
+                c.is_nullable,
+                c.column_default,
+                c.ordinal_position,
+                d.description as column_comment
+            FROM information_schema.columns c
+            LEFT JOIN pg_catalog.pg_class cl ON cl.relname = c.table_name
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = cl.relnamespace AND n.nspname = c.table_schema
+            LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = cl.oid AND a.attname = c.column_name
+            LEFT JOIN pg_catalog.pg_description d ON d.objoid = cl.oid AND d.objsubid = a.attnum
+            WHERE c.table_schema = '{schema_name}'
+            AND c.table_name = '{table_name}'
+            ORDER BY c.ordinal_position
         """
 
         try:
@@ -1039,6 +1044,7 @@ class RedshiftConnector(BaseSqlConnector, SchemaNamespaceMixin, MaterializedView
                     data_type = row[1]
                     nullable = row[2] == "YES"
                     default_value = row[3]
+                    comment = row[5] if len(row) > 5 else None
 
                     column_info = {
                         "cid": idx,
@@ -1047,7 +1053,7 @@ class RedshiftConnector(BaseSqlConnector, SchemaNamespaceMixin, MaterializedView
                         "nullable": nullable,
                         "pk": False,  # Would need to query pg_constraint for this
                         "default_value": default_value,
-                        "comment": None,
+                        "comment": comment,
                     }
 
                     schemas.append(column_info)
