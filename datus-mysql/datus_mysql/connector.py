@@ -319,7 +319,8 @@ class MySQLConnector(SQLAlchemyConnector):
     def do_switch_context(self, catalog_name: str = "", database_name: str = "", schema_name: str = ""):
         """Switch database context using USE statement."""
         if database_name:
-            self.connection.execute(text(f"USE {self._quote_identifier(database_name)}"))
+            with self.engine.connect() as conn:
+                conn.execute(text(f"USE {self._quote_identifier(database_name)}"))
 
     # ==================== Sample Data ====================
 

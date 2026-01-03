@@ -1,0 +1,20 @@
+services:
+  starrocks:
+    image: starrocks/allin1-ubuntu:3.3.0
+    container_name: datus-starrocks-test
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "9030:9030"  # MySQL protocol port
+      - "8030:8030"  # HTTP port
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -h127.0.0.1 -P9030 -uroot -e 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - starrocks_data:/data
+
+volumes:
+  starrocks_data:

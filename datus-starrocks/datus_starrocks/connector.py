@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0.
 # See http://www.apache.org/licenses/LICENSE-2.0 for details.
 
-from typing import Any, Dict, List, Union, override
+from typing import Any, Dict, List, Set, Union, override
 
 from datus.tools.db_tools.base import list_to_in_str
 from datus.tools.db_tools.mixins import CatalogSupportMixin, MaterializedViewSupportMixin
@@ -231,6 +231,13 @@ class StarRocksConnector(MySQLConnector, CatalogSupportMixin, MaterializedViewSu
         return mv_list
 
     # ==================== Database Management ====================
+
+    def _sys_databases(self) -> Set[str]:
+        """System databases to filter out (StarRocks-specific)."""
+        # Include MySQL system databases plus StarRocks-specific ones
+        mysql_sys = super()._sys_databases()
+        starrocks_sys = {"_statistics_"}
+        return mysql_sys | starrocks_sys
 
     @override
     def get_databases(self, catalog_name: str = "", include_sys: bool = False) -> List[str]:

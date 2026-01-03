@@ -150,10 +150,43 @@ result = connector.execute_query(f"SELECT * FROM {full_name} LIMIT 10")
 
 ## Requirements
 
-- Python >= 3.10
+- Python >= 3.12
 - StarRocks >= 2.0
-- datus-agent >= 0.3.0
+- datus-agent >= 0.2.1
 - datus-mysql >= 0.1.0
+
+## Testing
+
+### Quick Start
+
+```bash
+# 1. Start StarRocks test container
+docker-compose up -d && sleep 60
+docker exec datus-starrocks-test mysql -h127.0.0.1 -P9030 -uroot \
+  -e "CREATE DATABASE IF NOT EXISTS test;"
+
+# 2. Run tests
+./scripts/test.sh unit         # Unit tests (60 tests, ~0.03s)
+./scripts/test.sh integration  # Integration tests (35 tests, ~1.5s)
+./scripts/test.sh acceptance   # Acceptance tests (28 tests, CI subset)
+./scripts/test.sh all          # All tests
+```
+
+### Test Types
+
+- **Unit tests** (60): Configuration and connector logic with Mocks (no database needed)
+- **Integration tests** (35): Real database operations (catalog, materialized views, SQL)
+- **Acceptance tests** (28): Critical functionality subset for CI/CD
+
+### Environment Variables
+
+Tests use these default values (automatically set by `./scripts/test.sh`):
+
+- `STARROCKS_HOST=localhost`
+- `STARROCKS_PORT=9030`
+- `STARROCKS_USER=root`
+- `STARROCKS_PASSWORD=""`
+- `STARROCKS_DATABASE=test`
 
 ## Connection Cleanup
 
