@@ -51,7 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync
+          uv sync --package datus-mysql
 
       - name: Run unit tests for datus-mysql
         run: |
