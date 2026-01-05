@@ -6,6 +6,11 @@ on:
       - opened
       - synchronize
       - reopened
+    paths:
+      - 'datus-mysql/**'
+      - 'datus-postgresql/**'
+      - 'datus-sqlalchemy/**'
+      - '.github/workflows/test.yml'
   push:
     branches:
       - main
@@ -15,8 +20,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  detect-changes:
+    runs-on: self-hosted
+    outputs:
+      mysql: ${{ steps.filter.outputs.mysql }}
+      postgresql: ${{ steps.filter.outputs.postgresql }}
+      sqlalchemy: ${{ steps.filter.outputs.sqlalchemy }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            mysql:
+              - 'datus-mysql/**'
+              - 'datus-sqlalchemy/**'
+            postgresql:
+              - 'datus-postgresql/**'
+              - 'datus-sqlalchemy/**'
+            sqlalchemy:
+              - 'datus-sqlalchemy/**'
+
+  test-mysql:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.mysql == 'true' || github.ref == 'refs/heads/main' }}
+    runs-on: self-hosted
 
     services:
       mysql:
@@ -74,3 +102,64 @@ jobs:
           file: ./coverage.xml
           flags: datus-mysql
           name: datus-mysql-coverage
+
+  test-postgresql:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.postgresql == 'true' || github.ref == 'refs/heads/main' }}
+    runs-on: self-hosted
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user -d test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+          --health-start-period=30s
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv sync --package datus-postgresql
+
+      - name: Run unit tests for datus-postgresql
+        run: |
+          uv run pytest datus-postgresql/tests/ -m "not integration" -v --cov=datus_postgresql --cov-report=term --cov-report=xml
+
+      - name: Run integration tests for datus-postgresql
+        env:
+          POSTGRESQL_HOST: 127.0.0.1
+          POSTGRESQL_PORT: 5432
+          POSTGRESQL_USER: test_user
+          POSTGRESQL_PASSWORD: test_password
+          POSTGRESQL_DATABASE: test
+        run: |
+          uv run pytest datus-postgresql/tests/integration/ -m integration -v
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          flags: datus-postgresql
+          name: datus-postgresql-coverage
