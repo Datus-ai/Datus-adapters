@@ -1,0 +1,42 @@
+[project]
+name = "datus-clickhouse"
+version = "0.1.0"
+description = "ClickHouse database adapter for Datus"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "DatusAI", email = "support@datus.ai"}
+]
+keywords = ["datus", "database", "clickhouse", "adapter"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "datus-agent>0.2.1",
+    "datus-sqlalchemy>=0.1.0",
+    "clickhouse-sqlalchemy>=0.3.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/Datus-ai/datus-db-adapters"
+Repository = "https://github.com/Datus-ai/datus-db-adapters"
+Issues = "https://github.com/Datus-ai/datus-db-adapters/issues"
+
+[project.entry-points."datus.adapters"]
+clickhouse = "datus_clickhouse:register"
+
+[tool.uv.sources]
+datus-sqlalchemy = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["datus_clickhouse"]
